@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Docker compose since it is in its final version and it holds the client_secret
+docker-compose.yml
