@@ -5,10 +5,8 @@ services:
     container_name: reddit-auto-saved-downloader
     build:
       context: ./App
-    ports: 
-      - "3000:3000"
     environment: # All are required
       - CLIENT_ID=
       - CLIENT_SECRET=
-      - REDIRECT_URI=
-      - PORT=3000 # internal port
+      - REDDIT_USERNAME=
+      - REDDIT_PASSWORD=
