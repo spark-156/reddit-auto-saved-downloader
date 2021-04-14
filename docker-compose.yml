@@ -1,0 +1,8 @@
+version: "3"
+
+services: 
+  reddit-auto-saved-downloader:
+    container_name: reddit-auto-saved-downloader
+    build:
+      context: ./App
+      
