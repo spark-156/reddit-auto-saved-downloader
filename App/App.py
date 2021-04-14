@@ -1,5 +1,6 @@
 import praw
 import os
+import sys
 
 try:
 	CLIENT_ID = os.environ["CLIENT_ID"]
@@ -21,4 +22,9 @@ reddit = praw.Reddit(
 	password=REDDIT_PASSWORD,
 )
 
-print(reddit.user.me().saved(limit=None))
+iterator = 0
+
+saved = reddit.user.me().saved(limit=None)
+for item in saved:
+	iterator += 1
+	print(f"[Saved link] {item.id}")
