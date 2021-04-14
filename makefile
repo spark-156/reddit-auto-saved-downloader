@@ -1,8 +1,8 @@
 start:
-	docker-compose up -d
+	docker-compose up -d --build
 
 run:
-	docker-compose up
+	docker-compose up --build
 
 build:
 	docker-compose build
