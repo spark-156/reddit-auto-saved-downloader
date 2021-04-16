@@ -131,5 +131,4 @@ dmypy.json
 # Docker compose since it is in its final version and it holds the client_secret
 docker-compose.yml
 
-# json containing all saved posts
-App/saved_posts*.json
+App/*.json
