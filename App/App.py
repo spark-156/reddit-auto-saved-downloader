@@ -22,15 +22,31 @@ reddit = praw.Reddit(
 	password=REDDIT_PASSWORD,
 )
 
+# init file if not exist
+if not os.path.isfile("saved_posts.json"): 
+	with open("saved_posts.json", "w") as saved_posts_file:
+		json.dump({}, saved_posts_file)
+
+# read file
 with open("saved_posts.json", "r") as saved_posts_file:
 	saved_posts = json.load(saved_posts_file)
 
-saved = reddit.user.me().saved(limit=None)
+# get all saved items and check if downloaded already
+i = 0
+saved = reddit.user.me().saved(limit=5)
 for item in saved:
 	post = praw.models.Submission(reddit, item.id)
-	saved_posts[post.id] = post.url
-	print(post.id, post.url)
+	if post.id in saved_posts: # if guard
+		continue
+	saved_posts[post.id] = {"url": post.url, "title": post.title, "permalink": post.permalink}
+	i += 1
 
+# Logging to user
+if i:
+	print(f"[Log] found {i} unique posts, downloading now")
+else:
+	print(f"[Log] found no unique posts, nothing to download waiting for next cronjob")
+
+# save file at end of script
 with open("saved_posts.json", "w") as saved_posts_file:
 	json.dump(saved_posts, saved_posts_file)
-
