@@ -42,13 +42,15 @@ class RedditUser:
 			json.dump(self.saved_posts, saved_posts_file)
 
 	# Get all saved posts present in json file
-	# @return dictionary with all post id's as keys and submission object as values.
+	# @returns nothing
 	def log_cached_saved_posts(self):
 		self.log("getting cached saved posts")
 		with open(f"saved_posts_{self.reddit_username}.json", "r") as saved_posts_file:
 			self.saved_posts = json.load(saved_posts_file)
 		self.log(self.saved_posts)
 
+	# Log a message in a certain format
+	# @returns nothing
 	def log(self, message):
 		print(f"[Log] {message}")
 	
