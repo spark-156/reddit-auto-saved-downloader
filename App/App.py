@@ -95,11 +95,6 @@ def update():
         # user.log_cached_saved_posts()
 
 
-@crython.job(expr='@reboot')
-def call_update():
-    update()
-
-
 if __name__ == '__main__':
     print('[Log] Waiting for crython job')
     crython.start()
