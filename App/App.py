@@ -8,6 +8,8 @@ limit = os.environ.get("limit", None)
 cronjob = os.environ.get("cronjob", "0 0 */2 * * * *")
 if len(cronjob) == 0: 
     cronjob = "0 0 */2 * * * *"
+if len(limit) == 0:
+    limit = None
 
 class RedditUser:
     def __init__(self, account, limit):
