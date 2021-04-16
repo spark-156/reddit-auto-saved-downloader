@@ -7,6 +7,7 @@ from datetime import datetime
 limit = os.environ.get("limit", None)
 cronjob = os.environ.get("cronjob", "0 */2 * * * * *")
 
+
 class RedditUser:
     def __init__(self, account, limit):
         self.limit = limit
@@ -28,13 +29,12 @@ class RedditUser:
     # @param limit - get latest {limit} amount of saved posts. Set to None if you want to get all saved posts
     # @returns nothing
     def get_saved_posts(self):
-        log("Getting saved posts from reddit")
         with open(f"saved_posts_{self.reddit_username}.json", "r") as saved_posts_file:
             self.saved_posts = json.load(saved_posts_file)
 
         i = 0
         saved = self.reddit.user.me().saved(limit=self.limit)
-        log("Gotten all saved posts")
+        log("Gotten all saved posts, comparing to cached now")
         for item in saved:
             # Skip everything that does not have a url or is not a submission
             try:
@@ -53,7 +53,12 @@ class RedditUser:
                 i += 1
             except:
                 continue
-        log(f"Saving {i} saved posts to local cache")
+
+        if i > 0:
+            log(f"Saving {i} newly saved posts to local cache")
+        else:
+            log("No newly saved posts found")
+
         with open(f"saved_posts_{self.reddit_username}.json", "w") as saved_posts_file:
             json.dump(self.saved_posts, saved_posts_file)
 
@@ -65,8 +70,7 @@ class RedditUser:
             self.saved_posts = json.load(saved_posts_file)
         log(self.saved_posts)
 
-# Log a message in a certain format
-# @returns nothing
+
 def log(message):
     current_time = datetime.now().strftime("%H:%M:%S")
     print(f"{current_time} [Log] {message}")
@@ -79,7 +83,6 @@ def update():
         reddit_accounts = json.load(reddit_accounts_file)
 
     for account in reddit_accounts:
-        log("Starting prawn")
         user = RedditUser(account, limit)
         log(f"Getting saved posts for user: {user.reddit_username}")
         user.get_saved_posts()
