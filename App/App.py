@@ -2,20 +2,10 @@ import praw
 import os
 import json
 import crython
+from datetime import datetime
 
 limit = os.environ.get("limit", None)
 cronjob = os.environ.get("cronjob", "0 */2 * * * * *")
-
-# # Setup logging for praw
-# import logging
-
-# handler = logging.StreamHandler()
-# handler.setLevel(logging.DEBUG)
-# for logger_name in ("praw", "prawcore"):
-#     logger = logging.getLogger(logger_name)
-#     logger.setLevel(logging.DEBUG)
-#     logger.addHandler(handler)
-
 
 class RedditUser:
     def __init__(self, account, limit):
@@ -78,7 +68,8 @@ class RedditUser:
 # Log a message in a certain format
 # @returns nothing
 def log(message):
-    print(f"[Log] {message}")
+    current_time = datetime.now().strftime("%H:%M:%S")
+    print(f"{current_time} [Log] {message}")
 
 
 @crython.job(expr=cronjob)
@@ -93,9 +84,10 @@ def update():
         log(f"Getting saved posts for user: {user.reddit_username}")
         user.get_saved_posts()
         # user.log_cached_saved_posts()
+    log("Waiting for next cronjob")
 
 
 if __name__ == '__main__':
-    print('[Log] Waiting for crython job')
+    log("Waiting for crython job")
     crython.start()
     crython.join()  # This will block
