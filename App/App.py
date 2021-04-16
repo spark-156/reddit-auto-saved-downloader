@@ -5,12 +5,16 @@ import crython
 from datetime import datetime
 
 limit = os.environ.get("limit", None)
-cronjob = os.environ.get("cronjob", "0 */2 * * * * *")
+cronjob = os.environ.get("cronjob", "0 0 */2 * * * *")
 
 
 class RedditUser:
     def __init__(self, account, limit):
-        self.limit = limit
+        if not limit == None:
+            self.limit = int(limit)
+        else:
+            self.limit = limit
+        
         self.saved_posts = {}
         self.reddit_username = account["username"]
         self.reddit = praw.Reddit(
