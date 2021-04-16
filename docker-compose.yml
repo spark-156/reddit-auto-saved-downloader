@@ -5,5 +5,8 @@ services:
     container_name: reddit-auto-saved-downloader
     build:
       context: ./App
+    environment: 
+      - cronjob=0 0 */2 * * * * #optional defaults to every 2 hours. Must be 7 long.
+      - limit=1000 #optional defaults to None so gets all your saved reddit posts this is fine even if you have reached the maximum amount of saved reddit posts, 1000 is the maximum FYI. Must be a number!
     volumes:
       - ./App:/usr/src/app
