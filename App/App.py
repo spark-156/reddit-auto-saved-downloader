@@ -14,7 +14,7 @@ class RedditUser:
             self.limit = int(limit)
         else:
             self.limit = limit
-        
+
         self.saved_posts = {}
         self.reddit_username = account["username"]
         self.reddit = praw.Reddit(
@@ -65,14 +65,6 @@ class RedditUser:
 
         with open(f"saved_posts_{self.reddit_username}.json", "w") as saved_posts_file:
             json.dump(self.saved_posts, saved_posts_file)
-
-    # Get all saved posts present in json file
-    # @returns nothing
-    def log_cached_saved_posts(self):
-        log("getting cached saved posts")
-        with open(f"saved_posts_{self.reddit_username}.json", "r") as saved_posts_file:
-            self.saved_posts = json.load(saved_posts_file)
-        log(self.saved_posts)
 
 
 def log(message):
