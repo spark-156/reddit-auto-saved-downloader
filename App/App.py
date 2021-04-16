@@ -1,6 +1,6 @@
 import praw
 import os
-import sys
+import json
 
 try:
 	CLIENT_ID = os.environ["CLIENT_ID"]
@@ -22,9 +22,15 @@ reddit = praw.Reddit(
 	password=REDDIT_PASSWORD,
 )
 
-iterator = 0
+with open("saved_posts.json", "r") as saved_posts_file:
+	saved_posts = json.load(saved_posts_file)
 
 saved = reddit.user.me().saved(limit=None)
 for item in saved:
-	iterator += 1
-	print(f"[Saved link] {item.id}")
+	post = praw.models.Submission(reddit, item.id)
+	saved_posts[post.id] = post.url
+	print(post.id, post.url)
+
+with open("saved_posts.json", "w") as saved_posts_file:
+	json.dump(saved_posts, saved_posts_file)
+
