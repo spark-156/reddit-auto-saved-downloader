@@ -1,19 +1,24 @@
 import praw
 import os
 import json
+import crython
 
-# Setup logging for praw
-import logging
+limit = os.environ.get("limit", None)
 
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-for logger_name in ("praw", "prawcore"):
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(handler)
+# # Setup logging for praw
+# import logging
+
+# handler = logging.StreamHandler()
+# handler.setLevel(logging.DEBUG)
+# for logger_name in ("praw", "prawcore"):
+#     logger = logging.getLogger(logger_name)
+#     logger.setLevel(logging.DEBUG)
+#     logger.addHandler(handler)
+
 
 class RedditUser:
-    def __init__(self, account):
+    def __init__(self, account, limit):
+        self.limit = limit
         self.saved_posts = {}
         self.reddit_username = account["username"]
         self.reddit = praw.Reddit(
@@ -31,22 +36,22 @@ class RedditUser:
     # Get all saved posts
     # @param limit - get latest {limit} amount of saved posts. Set to None if you want to get all saved posts
     # @returns nothing
-    def get_saved_posts(self, limit=None):
-        self.log("getting saved posts from reddit")
+    def get_saved_posts(self):
+        log("Getting saved posts from reddit")
         with open(f"saved_posts_{self.reddit_username}.json", "r") as saved_posts_file:
             self.saved_posts = json.load(saved_posts_file)
 
         i = 0
-        saved = self.reddit.user.me().saved(limit=limit)
+        saved = self.reddit.user.me().saved(limit=self.limit)
+        log("Gotten all saved posts")
         for item in saved:
             # Skip everything that does not have a url or is not a submission
             try:
-                # Praw is lazy so it doesnt actually request anything yet
-                submission = praw.models.Submission(self.reddit, item.id)
-
                 # Check if post is already saved, if it is skip it
-                if submission.id in self.saved_posts:  # if guard
+                if item in self.saved_posts:  # if guard
                     continue
+
+                submission = praw.models.Submission(self.reddit, item.id)
 
                 self.saved_posts[submission.id] = {
                     "title": submission.title,
@@ -57,28 +62,39 @@ class RedditUser:
                 i += 1
             except:
                 continue
-        self.log(f"saving {i} saved posts to local cache")
+        log(f"Saving {i} saved posts to local cache")
         with open(f"saved_posts_{self.reddit_username}.json", "w") as saved_posts_file:
             json.dump(self.saved_posts, saved_posts_file)
 
     # Get all saved posts present in json file
     # @returns nothing
     def log_cached_saved_posts(self):
-        self.log("getting cached saved posts")
+        log("getting cached saved posts")
         with open(f"saved_posts_{self.reddit_username}.json", "r") as saved_posts_file:
             self.saved_posts = json.load(saved_posts_file)
-        self.log(self.saved_posts)
+        log(self.saved_posts)
 
-    # Log a message in a certain format
-    # @returns nothing
-    def log(self, message):
-        print(f"[Log] {message}")
+# Log a message in a certain format
+# @returns nothing
+def log(message):
+    print(f"[Log] {message}")
 
 
-with open("reddit_accounts.json", "r") as reddit_accounts_file:
-    reddit_accounts = json.load(reddit_accounts_file)
+@crython.job(expr='@hourly')
+def update():
+    log("Opening all given accounts")
+    with open("reddit_accounts.json", "r") as reddit_accounts_file:
+        reddit_accounts = json.load(reddit_accounts_file)
 
-for account in reddit_accounts:
-    user = RedditUser(account)
-    user.get_saved_posts()
-    # user.log_cached_saved_posts()
+    for account in reddit_accounts:
+        log("Starting prawn")
+        user = RedditUser(account, limit)
+        log(f"Getting saved posts for user: {user.reddit_username}")
+        user.get_saved_posts()
+        # user.log_cached_saved_posts()
+
+
+if __name__ == '__main__':
+    print('[Log] Waiting for crython job')
+    crython.start()
+    crython.join()  # This will block
