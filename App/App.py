@@ -89,6 +89,6 @@ def update():
 
 
 if __name__ == '__main__':
-    log("Waiting for crython job")
+    log(f"Environment variables:\nlimit={limit}\ncronjob={cronjob}")
     crython.start()
     crython.join()  # This will block
