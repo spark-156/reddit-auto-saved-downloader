@@ -81,7 +81,7 @@ def log(message):
     print(f"[Log] {message}")
 
 
-@crython.job(expr="0 */2 * * * * *")
+@crython.job(expr=cronjob)
 def update():
     log("Opening all given accounts")
     with open("reddit_accounts.json", "r") as reddit_accounts_file:
