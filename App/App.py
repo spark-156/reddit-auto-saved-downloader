@@ -4,6 +4,7 @@ import json
 import crython
 
 limit = os.environ.get("limit", None)
+cronjob = os.environ.get("cronjob", "0 */2 * * * * *")
 
 # # Setup logging for praw
 # import logging
@@ -48,7 +49,7 @@ class RedditUser:
             # Skip everything that does not have a url or is not a submission
             try:
                 # Check if post is already saved, if it is skip it
-                if item in self.saved_posts:  # if guard
+                if item.id in self.saved_posts:  # if guard
                     continue
 
                 submission = praw.models.Submission(self.reddit, item.id)
@@ -80,7 +81,7 @@ def log(message):
     print(f"[Log] {message}")
 
 
-@crython.job(expr='@hourly')
+@crython.job(expr="0 */2 * * * * *")
 def update():
     log("Opening all given accounts")
     with open("reddit_accounts.json", "r") as reddit_accounts_file:
@@ -92,6 +93,11 @@ def update():
         log(f"Getting saved posts for user: {user.reddit_username}")
         user.get_saved_posts()
         # user.log_cached_saved_posts()
+
+
+@crython.job(expr='@reboot')
+def call_update():
+    update()
 
 
 if __name__ == '__main__':
