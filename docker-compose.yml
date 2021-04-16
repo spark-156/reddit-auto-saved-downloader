@@ -5,10 +5,5 @@ services:
     container_name: reddit-auto-saved-downloader
     build:
       context: ./App
-    environment: # All are required
-      - CLIENT_ID=
-      - CLIENT_SECRET=
-      - REDDIT_USERNAME=
-      - REDDIT_PASSWORD=
     volumes:
       - ./App:/usr/src/app
