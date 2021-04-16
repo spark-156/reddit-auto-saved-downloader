@@ -6,7 +6,8 @@ from datetime import datetime
 
 limit = os.environ.get("limit", None)
 cronjob = os.environ.get("cronjob", "0 0 */2 * * * *")
-
+if len(cronjob) == 0: 
+    cronjob = "0 0 */2 * * * *"
 
 class RedditUser:
     def __init__(self, account, limit):
@@ -82,7 +83,6 @@ def update():
         user = RedditUser(account, limit)
         log(f"Getting saved posts for user: {user.reddit_username}")
         user.get_saved_posts()
-        # user.log_cached_saved_posts()
     log("Waiting for next cronjob")
 
 
