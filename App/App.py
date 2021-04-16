@@ -43,11 +43,11 @@ class RedditUser:
 
 	# Get all saved posts present in json file
 	# @return dictionary with all post id's as keys and submission object as values.
-	def get_cached_saved_posts(self):
+	def log_cached_saved_posts(self):
 		self.log("getting cached saved posts")
-		with open(f"saved_posts_{self.reddit_username}", "r") as saved_posts_file:
+		with open(f"saved_posts_{self.reddit_username}.json", "r") as saved_posts_file:
 			self.saved_posts = json.load(saved_posts_file)
-		return self.saved_posts
+		self.log(self.saved_posts)
 
 	def log(self, message):
 		print(f"[Log] {message}")
@@ -58,5 +58,6 @@ with open("reddit_accounts.json", "r") as reddit_accounts_file:
 
 for account in reddit_accounts:
 	user = RedditUser(account)
-	user.get_saved_posts(5)
+	user.get_saved_posts(20)
+	user.log_cached_saved_posts()
 
