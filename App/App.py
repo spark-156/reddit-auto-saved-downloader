@@ -35,7 +35,7 @@ class RedditUser:
 			if submission.id in self.saved_posts: # if guard
 				continue
 			
-			self.saved_posts[submission.id] = submission
+			self.saved_posts[submission.id] = {"title": submission.title, "url": submission.url, "subreddit": submission.subreddit.display_name, "permalink": submission.permalink}
 			i += 1
 		self.log(f"saving {i} saved posts to local cache")
 		with open (f"saved_posts_{self.reddit_username}.json", "w") as saved_posts_file:
