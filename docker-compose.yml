@@ -10,3 +10,5 @@ services:
       - CLIENT_SECRET=
       - REDDIT_USERNAME=
       - REDDIT_PASSWORD=
+    volumes:
+      - ./App:/usr/src/app
