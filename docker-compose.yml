@@ -6,7 +6,7 @@ services:
     build:
       context: ./App
     environment: 
-      - cronjob=0 0 */2 * * * * #optional defaults to every 2 hours. Must be 7 long.
-      - limit=1000 #optional defaults to None so gets all your saved reddit posts this is fine even if you have reached the maximum amount of saved reddit posts, 1000 is the maximum FYI. Must be a number!
+      - cronjob= #optional defaults to every 2 hours aka "0 0 */2 * * * *" cronjob strings must be 7 long. Set to "@reboot" to run this script immediately and only once. Read the readme for all possible values.
+      - limit= #optional defaults to None. None retrieves all your saved reddit posts. Reddit allows for a maximum of 1000 saved posts. Must be a number
     volumes:
       - ./App:/usr/src/app
