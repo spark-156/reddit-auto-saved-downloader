@@ -13,10 +13,10 @@ class CronValidator(object):
         :return:
         """
         parts = expression.split(' ')
-        if len(parts) != 5:
+        if len(parts) != 7:
             raise ValueError('Invalid expression')
         elements = list()
-        for i in range(0, 5):
+        for i in range(0, 7):
             m = regex_list[i].fullmatch(parts[i])
             if not m:
                 raise ValueError('Invalid expression part {0}'.format(i))
