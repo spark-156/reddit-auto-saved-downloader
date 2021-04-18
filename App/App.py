@@ -72,10 +72,8 @@ def log(message, log_type="Log"):
 # Get all environment variables and confirm their validity
 limit = os.environ.get("limit", None)
 cronjob = os.environ.get("cronjob", "0 0 */2 * * * *")
-if len(cronjob) == 0:
-    cronjob = "0 0 */2 * * * *"
 
-# # TODO fix log not not defined NameError
+# Checking if limit env var is set correctly
 if len(limit) == 0:
     log("Limit not set, defaulting to None")
     limit = None
@@ -92,21 +90,31 @@ else:
     log("could not find anythhing about limit environment variable, defaulting to None")
     limit = None
 
+# checking if cronjob var is set correctly
+if len(cronjob) == 0:
+    log("Environment variable cronjob not set, defaulting to every two hours aka: '0 0 */2 * * * *'")
+    cronjob="0 0 */2 * * * *"
 
-@crython.job(expr=cronjob)
-def update():
-    log("Opening all given accounts")
-    with open("reddit_accounts.json", "r") as reddit_accounts_file:
-        reddit_accounts = json.load(reddit_accounts_file)
+# raised ValueError if cronjob is not set correctly, thus allowing me to use a simple way of checking if the var is set correctly
+try:
+    @crython.job(expr=cronjob)
+    def update():
+        log("Opening all given accounts")
+        with open("reddit_accounts.json", "r") as reddit_accounts_file:
+            reddit_accounts = json.load(reddit_accounts_file)
 
-    for account in reddit_accounts:
-        user = RedditUser(account, limit)
-        log(f"Getting saved posts for user: {user.reddit_username}")
-        user.get_saved_posts()
-    log("Waiting for next cronjob")
+        for account in reddit_accounts:
+            user = RedditUser(account, limit)
+            log(f"Getting saved posts for user: {user.reddit_username}")
+            user.get_saved_posts()
+        log("Waiting for next cronjob")
+except ValueError: # cronjob not set correctly
+    log("Cronjob was not correctly set, make sure it has 7 values and is in the following format: '* * * * * * *'", "Fatal error")
+    exit()
 
 
 if __name__ == '__main__':
     log(f"Environment variables:\nlimit={limit}\ncronjob={cronjob}")
+    log("Waiting for first cronjob")
     crython.start()
     crython.join()  # This will block
