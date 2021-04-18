@@ -4,27 +4,7 @@ import json
 import crython
 from datetime import datetime
 
-limit = os.environ.get("limit", None)
-cronjob = os.environ.get("cronjob", "0 0 */2 * * * *")
-if len(cronjob) == 0: 
-    cronjob = "0 0 */2 * * * *"
 
-
-if len(limit) == 0:
-    log("Limit not set, defaulting to None")
-    limit=None
-elif not limit.isdigit():
-    log("Limit is nog an integer, please do not use floats or text. Limit must be set to a number such as 980 or 254", "Fatal error")
-    exit()
-elif len(limit) > 0:
-    try:
-        limit = int(limit)
-    except:
-        log("Limit is nog an integer, please do not use floats or text. Limit must be set to a number such as 980 or 254", "Fatal error")
-        exit()
-else:
-    log("could not find anythhing about limit environment variable, setting it to default None")
-    limit = None
 class RedditUser:
     def __init__(self, account, limit):
         if not limit == None:
@@ -87,6 +67,31 @@ class RedditUser:
 def log(message, log_type="Log"):
     current_time = datetime.now().strftime("%H:%M:%S")
     print(f"{current_time} [{log_type}] {message}")
+
+
+# Get all environment variables and confirm their validity
+limit = os.environ.get("limit", None)
+cronjob = os.environ.get("cronjob", "0 0 */2 * * * *")
+if len(cronjob) == 0:
+    cronjob = "0 0 */2 * * * *"
+
+# # TODO fix log not not defined NameError
+if len(limit) == 0:
+    log("Limit not set, defaulting to None")
+    limit = None
+elif not limit.isdigit():
+    log("Environment variable limit is nog an integer, please do not use floats or text. Limit must be set to a number such as 980 or 254", "Fatal error")
+    exit()
+elif len(limit) > 0:
+    try:
+        limit = int(limit)
+    except:
+        log("Environment variable limit is nog an integer, please do not use floats or text. Limit must be set to a number such as 980 or 254", "Fatal error")
+        exit()
+else:
+    log("could not find anythhing about limit environment variable, defaulting to None")
+    limit = None
+
 
 @crython.job(expr=cronjob)
 def update():
