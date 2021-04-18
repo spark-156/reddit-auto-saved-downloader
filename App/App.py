@@ -57,11 +57,11 @@ class RedditUser:
 
         if i > 0:
             log(f"Saving {i} newly saved posts to local cache")
+            with open(f"saved_posts_{self.reddit_username}.json", "w") as saved_posts_file:
+                json.dump(self.saved_posts, saved_posts_file)
         else:
             log("No newly saved posts found")
 
-        with open(f"saved_posts_{self.reddit_username}.json", "w") as saved_posts_file:
-            json.dump(self.saved_posts, saved_posts_file)
 
 
 def log(message, log_type="Log"):
@@ -107,6 +107,10 @@ try:
             user = RedditUser(account, limit)
             log(f"Getting saved posts for user: {user.reddit_username}")
             user.get_saved_posts()
+        
+        if cronjob == "@reboot": #if guard for runnning only once with @reboot option
+            os._exit() #! Does not work within docker / find alternative
+
         log("Waiting for next cronjob")
 except ValueError: # cronjob not set correctly
     log("Cronjob was not correctly set, make sure it has 7 values and is in the following format: '* * * * * * *'", "Fatal error")
@@ -115,6 +119,7 @@ except ValueError: # cronjob not set correctly
 
 if __name__ == '__main__':
     log(f"Environment variables:\nlimit={limit}\ncronjob={cronjob}")
-    log("Waiting for first cronjob")
+    if not cronjob == "@reboot": 
+        log("Waiting for first cronjob")
     crython.start()
     crython.join()  # This will block
