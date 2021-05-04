@@ -12,6 +12,7 @@ class RedditUser:
         else:
             self.limit = limit
 
+        self.newly_saved_posts = []
         self.saved_posts = {}
         self.reddit_username = account["username"]
         self.reddit = praw.Reddit(
@@ -52,6 +53,7 @@ class RedditUser:
                     "permalink": submission.permalink
                 }
                 i += 1
+                self.newly_saved_posts.append(submission.id)
             except:
                 continue
 
@@ -63,6 +65,18 @@ class RedditUser:
         with open(f"saved_posts_{self.reddit_username}.json", "w") as saved_posts_file:
             json.dump(self.saved_posts, saved_posts_file)
 
+    def download_saved_posts(self):
+        log("Downloading all saved posts")
+        for id in self.newly_saved_posts:
+            try:
+                log(f"Downloading {self.saved_posts[id]['title']} from {self.saved_posts[id]['subreddit']}, {self.saved_posts[id]['url']}")
+                url = self.saved_posts[id]["url"]
+                os.system(f"gallery-dl -o base-directory=./Downloads/{self.reddit_username}/ -o directory= -o output=null '{url}'")
+            except:
+                continue
+
+    def chown_downloaded_files(self):
+        os.system("chmod -R 777 ./Downloads")
 
 def log(message, log_type="Log"):
     current_time = datetime.now().strftime("%H:%M:%S")
@@ -93,7 +107,7 @@ else:
 # checking if cronjob var is set correctly
 if len(cronjob) == 0:
     log("Environment variable cronjob not set, defaulting to every two hours aka: '0 0 */2 * * * *'")
-    cronjob="0 0 */2 * * * *"
+    cronjob = "0 0 */2 * * * *"
 
 # raised ValueError if cronjob is not set correctly, thus allowing me to use a simple way of checking if the var is set correctly
 try:
@@ -107,8 +121,10 @@ try:
             user = RedditUser(account, limit)
             log(f"Getting saved posts for user: {user.reddit_username}")
             user.get_saved_posts()
+            user.download_saved_posts()
+            user.chown_downloaded_files()
         log("Waiting for next cronjob")
-except ValueError: # cronjob not set correctly
+except ValueError:  # cronjob not set correctly
     log("Cronjob was not correctly set, make sure it has 7 values and is in the following format: '* * * * * * *'", "Fatal error")
     exit()
 
