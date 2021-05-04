@@ -3,6 +3,20 @@ Docker image that'll check your reddit accounts saved posts on a cronjob interva
 
 This script is made purely for the purpose of downloading all your reddit saved pictures!
 
+## Git flow information
+branches:
+* `master`
+  * Clean branch protected. No git push allowed. Only merge request from `alpha` branch. This is the `production` branch and must be clean.
+* `alpha`
+  * (Half-)clean branch which is ready to be set into production. No git push allowed. Only merge requests from `feature/*` or `fix/*` branches.
+* `feature/[user-story-id]`
+  * A branch derived from `alpha` that is created specifically for that feature.
+* `fix/[issue]`
+  * A branch derived from `alpha` that is created for that specific issue (id).
+* `test/[test-name]`
+  * A branch derived from `alpha` that has no finished product and is only created for testing. No merge back allowed.
+
+
 # Running on your own server
 
 Its extremely simple to run this bot on your own server. You can do it with or without docker, I recommend with docker! I'll tell you how to run both regardless though.
