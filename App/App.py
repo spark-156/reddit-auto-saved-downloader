@@ -76,7 +76,7 @@ class RedditUser:
                 continue
 
     def chown_downloaded_files(self):
-        os.system("chmod -R 777 ./Downloads")
+        os.system("chown -R 777 ./Downloads")
 
 def log(message, log_type="Log"):
     current_time = datetime.now().strftime("%H:%M:%S")
