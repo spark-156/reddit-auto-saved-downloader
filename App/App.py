@@ -5,6 +5,11 @@ import crython
 from datetime import datetime
 
 
+def log(message, log_type="Log"):
+    current_time = datetime.now().strftime("%H:%M:%S")
+    print(f"{current_time} [{log_type}] {message}")
+
+
 class RedditUser:
     def __init__(self, account, limit):
         if not limit == None:
@@ -33,6 +38,7 @@ class RedditUser:
     def get_saved_posts(self):
         with open(f"saved_posts_{self.reddit_username}.json", "r") as saved_posts_file:
             self.saved_posts = json.load(saved_posts_file)
+            self.cache = self.saved_posts.copy()
 
         i = 0
         saved = self.reddit.user.me().saved(limit=self.limit)
@@ -40,8 +46,9 @@ class RedditUser:
         for item in saved:
             # Skip everything that does not have a url or is not a submission
             try:
-                # Check if post is already saved, if it is skip it
-                if item.id in self.saved_posts:  # if guard
+                # Check if post is already saved, if it is delete it
+                if item.id in self.cache:  # if guard
+                    del self.cahce.item.id
                     continue
 
                 submission = praw.models.Submission(self.reddit, item.id)
@@ -78,14 +85,15 @@ class RedditUser:
     def chown_downloaded_files(self):
         os.system("chmod -R 777 ./Downloads")
 
-def log(message, log_type="Log"):
-    current_time = datetime.now().strftime("%H:%M:%S")
-    print(f"{current_time} [{log_type}] {message}")
-
 
 # Get all environment variables and confirm their validity
 limit = os.environ.get("limit", None)
 cronjob = os.environ.get("cronjob", "0 0 */2 * * * *")
+username = os.environ.get("username", None)
+password = os.environ.get("password", None)
+client_id = os.environ.get("client_id", None)
+client_secret = os.environ.get("client_secret", None)
+
 
 # Checking if limit env var is set correctly
 if len(limit) == 0:
@@ -104,27 +112,32 @@ else:
     log("could not find anythhing about limit environment variable, defaulting to None")
     limit = None
 
+
 # checking if cronjob var is set correctly
 if len(cronjob) == 0:
     log("Environment variable cronjob not set, defaulting to every two hours aka: '0 0 */2 * * * *'")
     cronjob = "0 0 */2 * * * *"
 
+
+# Check if all env vars have been set
+if not (username & password & client_id & client_secret):
+    log("username, password, client_id and/ or client_secret haven't all been set. Exiting")
+    exit()
+
+
 # raised ValueError if cronjob is not set correctly, thus allowing me to use a simple way of checking if the var is set correctly
 try:
     @crython.job(expr=cronjob)
     def update():
-        log("Opening all given accounts")
-        with open("reddit_accounts.json", "r") as reddit_accounts_file:
-            reddit_accounts = json.load(reddit_accounts_file)
+        log('Starting crython job')
 
-        for account in reddit_accounts:
-            user = RedditUser(account, limit)
-            log(f"Getting saved posts for user: {user.reddit_username}")
-            user.get_saved_posts()
-            user.download_saved_posts()
-            user.chown_downloaded_files()
+        user = RedditUser({"username": username, "password": password, "client_id": client_id, "client_secret": client_secret}, limit)
+        log(f"Getting saved posts for user: {user.reddit_username}")
+        user.get_saved_posts()
         log("Waiting for next cronjob")
-except ValueError:  # cronjob not set correctly
+
+
+except ValueError: # cronjob not set correctly
     log("Cronjob was not correctly set, make sure it has 7 values and is in the following format: '* * * * * * *'", "Fatal error")
     exit()
 
