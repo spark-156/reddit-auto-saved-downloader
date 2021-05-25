@@ -134,6 +134,8 @@ try:
         user = RedditUser({"username": username, "password": password, "client_id": client_id, "client_secret": client_secret}, limit)
         log(f"Getting saved posts for user: {user.reddit_username}")
         user.get_saved_posts()
+        user.download_saved_posts()
+        user.chown_downloaded_files()
         log("Waiting for next cronjob")
 
 
