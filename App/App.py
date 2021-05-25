@@ -78,7 +78,7 @@ class RedditUser:
             try:
                 log(f"Downloading {self.saved_posts[id]['title']} from {self.saved_posts[id]['subreddit']}, {self.saved_posts[id]['url']}")
                 url = self.saved_posts[id]["url"]
-                os.system(f"gallery-dl -o base-directory=./Downloads/{self.reddit_username}/ -o directory= -o output=null '{url}'")
+                os.system(f"gallery-dl -o base-directory=./Downloads -o directory= -o output=null '{url}'")
             except:
                 continue
 
@@ -120,7 +120,7 @@ if len(cronjob) == 0:
 
 
 # Check if all env vars have been set
-if not (username & password & client_id & client_secret):
+if not (username is not None and password is not None and client_id is not None and client_secret is not None):
     log("username, password, client_id and/ or client_secret haven't all been set. Exiting")
     exit()
 
